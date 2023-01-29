@@ -6,7 +6,15 @@
 
 using namespace std;
 
-void* checkBasic(void* arg);
+void* checkRow(void* arg);
+void* checkColumn(void* arg);
+void* checkBox(void* arg);
+
+enum Mode {
+    ROW,
+    COL,
+    BOX
+};
 
 class Board {
 public:
@@ -44,23 +52,40 @@ public:
 typedef struct threadData {
     int threadId;
     Board* board;
-    int mode; // row, col, box
     int start_point;
+    int check_count;
+    bool result;
 } threadData;
 
 int main() {
     Board board("data/solved1.txt");
-    board.repr();
-    pthread_t threadArr[board.k];
-    threadData dataArr[board.k];
+    int K = board.k;
+    int N = board.n;
+    pthread_t threadArr[K];
+    threadData dataArr[K];
 
-    for (int i = 0; i < board.k; i++) {
+    for (int i = 0; i < K; i++) {
+        Mode mode = (Mode)(i % 3);
+
         dataArr[i].threadId = i;
         dataArr[i].board = &board;
-        dataArr[i].mode = i % 3;
-        dataArr[i].start_point = i / 3; // this needs to be changed
-        pthread_create(&threadArr[i], NULL, checkBasic, (void*)&dataArr[i]);
+        dataArr[i].check_count = 3*N/K; // This might not work for the last thread
+        dataArr[i].result = true;
+
+        if(mode == ROW) {
+            dataArr[i].start_point = i * K; // every 1st thread is a row
+            pthread_create(&threadArr[i], NULL, checkRow, (void*)&dataArr[i]);
+        } 
+        else if(mode == COL) {
+            dataArr[i].start_point = (i-1) * K; // every 2nd thread is a column
+            pthread_create(&threadArr[i], NULL, checkColumn, (void*)&dataArr[i]);
+        } 
+        else if(mode == BOX) {
+            dataArr[i].start_point = (i-2) * K; // every 3rd thread is a box
+            pthread_create(&threadArr[i], NULL, checkBox, (void*)&dataArr[i]);
+        }
     }
+    // Need to find a way to make all threads cancel if one returns false
 
     for (int i = 0; i < board.k; i++) {
         pthread_join(threadArr[i], NULL);
@@ -70,14 +95,41 @@ int main() {
 }
 
 
-void* checkBasic(void* arg)
+void* checkRow(void* arg)
 {
     threadData* data = (threadData*)arg;
     Board* board = data->board;
-    int mode = data->mode;
     int start_point = data->start_point;
     int threadId = data->threadId;
+    int check_count = data->check_count;
 
-    board->repr();
+    cout << "Thread " << threadId << " is checking rows " << start_point << " to " << start_point + check_count << endl;
+
+    return NULL;
+}
+
+void* checkColumn(void* arg)
+{
+    threadData* data = (threadData*)arg;
+    Board* board = data->board;
+    int start_point = data->start_point;
+    int threadId = data->threadId;
+    int check_count = data->check_count;
+
+    cout << "Thread " << threadId << " is checking columns " << start_point << " to " << start_point + check_count << endl;
+
+    return NULL;
+}
+
+void* checkBox(void* arg)
+{
+    threadData* data = (threadData*)arg;
+    Board* board = data->board;
+    int start_point = data->start_point;
+    int threadId = data->threadId;
+    int check_count = data->check_count;
+
+    cout << "Thread " << threadId << " is checking boxes " << start_point << " to " << start_point + check_count << endl;
+
     return NULL;
 }
