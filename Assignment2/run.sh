@@ -1,3 +1,3 @@
-g++ main.cpp -o main
+g++ main.cpp -lpthread -o main
 ./main
 rm main
