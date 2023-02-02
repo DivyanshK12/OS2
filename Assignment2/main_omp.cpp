@@ -84,7 +84,7 @@ typedef struct threadData
     Board board;
     int start_point;
     int check_count;
-    bool result;
+    vector<bool> results;
 } threadData;
 
 void *checkRow(void *arg);
@@ -95,7 +95,7 @@ int createThreads(Mode mode, int remainingThreadCount, int remTasks, int iter,
 
 int main()
 {
-    Board board("data/random1.txt");
+    Board board("input.txt");
     int K = board.k;
     int N = board.n;
     threadData dataArr[N];
@@ -105,7 +105,7 @@ int main()
         dataArr[iter].start_point = (iter == 0) ? 0 : dataArr[iter - 1].start_point + dataArr[iter - 1].check_count;
         dataArr[iter].board = Board(board); // create copies of board for each thread
         dataArr[iter].check_count = 1;
-        dataArr[iter].result = false;
+        dataArr[iter].results = vector<bool>(3, false);
     }
 
     omp_set_dynamic(false);
@@ -121,17 +121,17 @@ int main()
         checkRow((void *)&dataArr[i]);
     }
 
-#pragma omp barrier
     auto end = chrono::high_resolution_clock::now();
-    cout << "Time taken: " << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microseconds" << endl;
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
+    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
     for (int i = 0; i < board.n; i++)
     {
-        if (!dataArr[i].result)
+        for(int j = 0; j < 3; j++)
+        if (!dataArr[i].results[j])
         {
-            cout << "Board is not valid" << endl;
+            cout << "Board is not valid at " << i << " " << j << endl;
             return 0;
         }
-        cout << "Result of i" << i << ": " << dataArr[i].result << endl;
     }
     cout << "Board is valid" << endl;
     return 0;
@@ -145,6 +145,7 @@ void *checkRow(void *arg)
     int threadId = data->threadId;
     int check_count = data->check_count;
     unordered_map<int, bool> nums_seen; // key = number, value = seen
+    bool result = true;
 
     for (int i = 0; i < check_count; i++)
     {
@@ -153,8 +154,7 @@ void *checkRow(void *arg)
             int num = board.data[start_point + i][j];
             if (nums_seen.find(num) != nums_seen.end())
             {
-                data->result = false;
-                cout << "Thread " << threadId << " checking row " << start_point << endl;
+                result = false;
                 return NULL; // can call pthread_exit() here ?
             }
             else
@@ -164,7 +164,7 @@ void *checkRow(void *arg)
         }
         nums_seen.clear();
     }
-    data->result = true;
+    data->results[0] = result;
     return NULL;
 }
 
@@ -176,6 +176,8 @@ void *checkColumn(void *arg)
     int threadId = data->threadId;
     int check_count = data->check_count;
     unordered_map<int, bool> nums_seen; // key = number, value = seen
+    bool result = true;
+
     for (int i = 0; i < check_count; i++)
     {
         for (int j = 0; j < board.n; j++)
@@ -183,8 +185,7 @@ void *checkColumn(void *arg)
             int num = board.data[j][start_point + i];
             if (nums_seen.find(num) != nums_seen.end())
             {
-                data->result = false;
-                cout << "Thread " << threadId << " checking column " << start_point << endl;
+                result = false;
                 return NULL; // can call pthread_exit() here ?
             }
             else
@@ -194,7 +195,7 @@ void *checkColumn(void *arg)
         }
         nums_seen.clear();
     }
-    data->result = true;
+    data->results[1] = result;
     return NULL;
 }
 
@@ -207,6 +208,7 @@ void *checkBox(void *arg)
     int check_count = data->check_count;
     unordered_map<int, bool> nums_seen; // key = number, value = seen
     int sqrtn = sqrt(board.n);
+    bool result = true;
 
     for (int i = 0; i < check_count; i++)
     {
@@ -219,8 +221,7 @@ void *checkBox(void *arg)
                 int num = board.data[startRow + j][startCol + k];
                 if (nums_seen.find(num) != nums_seen.end())
                 {
-                    data->result = false;
-                    cout << "Thread " << threadId << " checking box " << start_point << endl;
+                    result = false;
                     return NULL; // can call pthread_exit() here ?
                 }
                 else
@@ -231,6 +232,6 @@ void *checkBox(void *arg)
         }
         nums_seen.clear();
     }
-    data->result = true;
+    data->results[2] = result;
     return NULL;
 }

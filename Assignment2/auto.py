@@ -8,11 +8,11 @@ threads = [2**i for i in range(1, 7)] # list of threads from 2 to 64
 # task 1
 # vary square count, keep thread count at 16
 results = {}
-with open("task2.txt", "a") as f:
-    for square in threads:
+with open("task1.txt", "a") as f:
+    for square in squares:
         with open("input.txt", "w") as g:
-            g.write(f"{square} 25\n")
-        os.system(f"python3 sudoku_gen.py 25 >> input.txt")
+            g.write(f"16 {square}\n")
+        os.system(f"python3 sudoku_gen.py {square} >> input.txt")
 
         os.system("./main > output.txt")
         time.sleep(5) # wait for 5 seconds

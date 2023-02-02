@@ -1,3 +1,2 @@
-g++ main_omp.cpp -fopenmp -o main
+g++ main.cpp -lpthread -o main
 ./main
-rm ./main
