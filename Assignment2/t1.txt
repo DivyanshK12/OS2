@@ -1,0 +1,258 @@
+Thread Thread Thread Thread 7Thread 14Thread  is checking 2812 is checking  is checking 8
+569 is checking 3648Thread 3 is checking 12
+10 is checking 40
+
+Thread 2 is checking 8
+
+Thread 4 is checking 16
+Thread 15 is checking 60
+Thread 13 is checking 52
+Thread 0 is checking 0
+
+ is checking 32
+Thread 3 checking box 12
+Thread 15 checking box 60
+Thread 9 checking box 36
+Thread 5 is checking 20Thread 
+13 checking box Thread Thread 814 checking box  checking box 3256Thread 
+Thread 1 is checking 4
+Thread 10 checking box 40
+
+7 checking box 28
+Thread 11 is checking 44
+Thread 14 checking column 56
+Thread 2 checking box 8
+Thread 10 checking column 40
+Thread Thread 15 checking column 60
+Thread Thread 7 checking column 2812
+Thread 1 checking box 4
+Thread Thread 11 checking box 44
+Thread 6 is checking 24
+Thread 2 checking column 8
+Thread 14 is checking 57
+Thread 1 checking column 4
+Thread 10 is checking 41
+Thread 15 is checking 61
+Thread 7 is checking 29
+3 checking column 12
+Thread 8 checking column 32
+Thread 14 checking box 57
+Thread 2 is checking 9
+Thread 10 checking box 41
+Thread 15 checking box 61
+Thread Thread 1 is checking 5
+Thread 7 checking box 29
+Thread 4 checking box 16
+Thread 14 checking column 57
+Thread 3 is checking 13
+Thread 10 checking column 41
+9 checking column 36
+Thread 15 checking column 61
+Thread 1 checking box 5
+Thread 7 checking column 29
+Thread 4 checking column 16
+Thread 3 checking box 13
+Thread 14 is checking 58
+Thread 1 checking column 5
+Thread 10 is checking 42
+Thread 15 is checking 62
+Thread Thread 3 checking column 13
+Thread 8 is checking 33
+Thread 4 is checking 17
+Thread 14 checking box 58
+6 checking box 24
+Thread 10 checking box 42
+Thread 15 checking box 62
+Thread 1 is checking 6
+Thread 8 checking box 33
+Thread 4 checking box 17
+Thread 14 checking column 58
+Thread 6 checking column 24
+Thread 3 is checking 14
+Thread 10 checking column 42
+Thread 15 checking column 62
+Thread 1 checking box 6
+Thread 11 checking column 44
+Thread 4 checking column 17
+Thread 3 checking box 14
+Thread 14 is checking 59
+Thread 6 is checking 25
+Thread 10 is checking 43
+Thread 1 checking column 6
+Thread 15 is checking 63
+Thread 3 checking column 14
+Thread 11 is checking 45
+Thread 4 is checking 18
+Thread 0 checking box 0
+Thread 10 checking box 43
+Thread 15 checking box 63
+Thread 11 checking box 45
+Thread 7 is checking 30
+Thread 1 is checking 7
+Thread 4 checking box 18
+Thread 0 checking column 0
+Thread 3 is checking 15
+Thread 5 checking box 20
+Thread 15 checking column 63
+Thread 11 checking column 45
+Thread 1 checking box 7
+Thread 4 checking column 18
+Thread 6 checking box 25
+Thread 3 checking box 15
+52
+Thread 5 checking column 20
+Thread 0 is checking 1
+Thread 1 checking column 7
+ checking box Thread 6 checking column 25
+Thread 3 checking column 15
+Thread 0 checking box 1
+48
+Thread 5 is checking 21
+Thread 8 checking column 33
+Thread 2 checking box 9
+Thread 6 is checking 26
+Thread 10 checking column 43
+Thread 5 checking box 21
+Thread 0 checking column 1
+Thread 2 checking column 9
+Thread 12 checking column 48
+9 is checking 37
+Thread 7 checking box 30
+Thread 5 checking column 21
+Thread 9 checking box 37
+Thread 7 checking column 30
+Thread Thread 4 is checking 19
+Thread 2 is checking 10
+Thread 0 is checking 2
+Thread 12 is checking 49
+Thread 5 is checking 22
+Thread 11 is checking 46
+Thread 4 checking box 19
+Thread 2 checking box 10
+Thread 0 checking box 2
+Thread 7 is checking 31
+Thread 5 checking box 22
+Thread 9 checking column 37
+Thread 12 checking box 49
+Thread 4 checking column 19
+Thread 2 checking column 10
+Thread 0 checking column 2
+Thread 7 checking box 31
+Thread 5 checking column 22
+Thread 12 checking column 49
+Thread 9 is checking 38
+Thread 7 checking column 31
+Thread 2 is checking 11
+14 checking box 59
+Thread 0 is checking 3
+Thread 5 is checking 23
+Thread 8 is checking 34
+Thread 2 checking box 11
+Thread 14 checking column 59
+Thread 0 checking box 3
+Thread 12 is checking 50
+Thread 5 checking box 23
+Thread 9 checking box 38
+Thread Thread 2 checking column 11
+8 checking box 34
+Thread 0 checking column 3
+Thread 6 checking box 26
+Thread 5 checking column 23
+Thread 9 checking column 38
+Thread 8 checking column 34
+Thread 13 checking column 52
+Thread 6 checking column 26
+Thread 12 checking box 50
+Thread 11 checking box 46
+Thread 9 is checking 39
+Thread 8 is checking 35
+Thread 6 is checking 27
+Thread 13 is checking 53
+Thread 12 checking column 50
+Thread 11 checking column 46
+Thread 8 checking box 35
+Thread 9 checking box 39
+Thread 6 checking box 27
+Thread 13 checking box 53
+Thread 8 checking column 35
+Thread 12 is checking 51
+Thread 11 is checking 47
+Thread 6 checking column 27
+Thread 9 checking column 39
+Thread 13 checking column 53
+Thread 12 checking box 51
+Thread 11 checking box 47
+Thread 12 checking column 51
+Thread 11 checking column 47
+Thread 13 is checking 54
+Thread 13 checking box 54
+Thread 13 checking column 54
+Thread 13 is checking 55
+Thread 13 checking box 55
+Thread 13 checking column 55
+Time taken: 6345 microseconds
+Result of i0: 1
+Result of i1: 1
+Result of i2: 1
+Result of i3: 1
+Result of i4: 1
+Result of i5: 1
+Result of i6: 1
+Result of i7: 1
+Result of i8: 1
+Result of i9: 1
+Result of i10: 1
+Result of i11: 1
+Result of i12: 1
+Result of i13: 1
+Result of i14: 1
+Result of i15: 1
+Result of i16: 1
+Result of i17: 1
+Result of i18: 1
+Result of i19: 1
+Result of i20: 1
+Result of i21: 1
+Result of i22: 1
+Result of i23: 1
+Result of i24: 1
+Result of i25: 1
+Result of i26: 1
+Result of i27: 1
+Result of i28: 1
+Result of i29: 1
+Result of i30: 1
+Result of i31: 1
+Result of i32: 1
+Result of i33: 1
+Result of i34: 1
+Result of i35: 1
+Result of i36: 1
+Result of i37: 1
+Result of i38: 1
+Result of i39: 1
+Result of i40: 1
+Result of i41: 1
+Result of i42: 1
+Result of i43: 1
+Result of i44: 1
+Result of i45: 1
+Result of i46: 1
+Result of i47: 1
+Result of i48: 1
+Result of i49: 1
+Result of i50: 1
+Result of i51: 1
+Result of i52: 1
+Result of i53: 1
+Result of i54: 1
+Result of i55: 1
+Result of i56: 1
+Result of i57: 1
+Result of i58: 1
+Result of i59: 1
+Result of i60: 1
+Result of i61: 1
+Result of i62: 1
+Result of i63: 1
+Board is valid

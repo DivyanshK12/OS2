@@ -1,5 +1,5 @@
 #include <iostream>
-#include <pthread.h>
+#include <omp.h>
 #include <vector>
 #include <string>
 #include <fstream>
@@ -95,88 +95,48 @@ int createThreads(Mode mode, int remainingThreadCount, int remTasks, int iter,
 
 int main()
 {
-    Board board("data/solved1.txt");
+    Board board("data/random1.txt");
     int K = board.k;
     int N = board.n;
-    pthread_t threadArr[K];
-    threadData dataArr[K];
+    threadData dataArr[N];
 
-    int rowThreadCount = K / 3;
-    int colThreadCount = K / 3;
-    int boxThreadCount = K / 3;
-
-    int remainingThreads = K % 3;
-    if (remainingThreads == 1)
+    for (int iter = 0; iter < N; iter++)
     {
-        rowThreadCount += 1;
-    }
-    else if (remainingThreads == 2)
-    {
-        rowThreadCount += 1;
-        colThreadCount += 1;
+        dataArr[iter].start_point = (iter == 0) ? 0 : dataArr[iter - 1].start_point + dataArr[iter - 1].check_count;
+        dataArr[iter].board = Board(board); // create copies of board for each thread
+        dataArr[iter].check_count = 1;
+        dataArr[iter].result = false;
     }
 
-    int iter = 0;
+    omp_set_dynamic(false);
+    omp_set_num_threads(K);
     auto start = chrono::high_resolution_clock::now();
-    iter = createThreads(ROW, rowThreadCount, N, iter, dataArr, threadArr, board);
-    iter = createThreads(COL, colThreadCount, N, iter, dataArr, threadArr, board);
-    iter = createThreads(BOX, boxThreadCount, N, iter, dataArr, threadArr, board);
-
-    for (int i = 0; i < board.k; i++)
+#pragma omp parallel for shared(dataArr)
+    for (int i = 0; i < N; i++)
     {
-        pthread_join(threadArr[i], NULL);
+        int tid = omp_get_thread_num(); // is now working
+        dataArr[i].threadId = tid;
+        checkBox((void *)&dataArr[i]);
+        checkColumn((void *)&dataArr[i]);
+        checkRow((void *)&dataArr[i]);
     }
 
-    auto stop = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::microseconds>(stop - start);
-    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
-    for (int i = 0; i < board.k; i++)
+#pragma omp barrier
+    auto end = chrono::high_resolution_clock::now();
+    cout << "Time taken: " << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microseconds" << endl;
+    for (int i = 0; i < board.n; i++)
     {
         if (!dataArr[i].result)
         {
             cout << "Board is not valid" << endl;
             return 0;
         }
+        cout << "Result of i" << i << ": " << dataArr[i].result << endl;
     }
     cout << "Board is valid" << endl;
-
     return 0;
 }
 
-int createThreads(Mode mode, int remainingThreadCount, int remTasks, int iter,
-                  threadData *dataArr, pthread_t *threadArr, Board board)
-{
-    int K = board.k;
-    int N = board.n;
-
-    while (remainingThreadCount > 0)
-    {
-        int currentCount = (remainingThreadCount == 1) ? remTasks : 3 * N / K;
-
-        dataArr[iter].start_point = (remTasks == N) ? 0 : dataArr[iter - 1].start_point + dataArr[iter - 1].check_count;
-        dataArr[iter].board = Board(board); // create copies of board for each thread
-        dataArr[iter].threadId = iter;
-        dataArr[iter].check_count = currentCount;
-
-        if (mode == ROW)
-        {
-            pthread_create(&threadArr[iter], NULL, checkRow, (void *)&dataArr[iter]);
-        }
-        else if (mode == COL)
-        {
-            pthread_create(&threadArr[iter], NULL, checkColumn, (void *)&dataArr[iter]);
-        }
-        else if (mode == BOX)
-        {
-            pthread_create(&threadArr[iter], NULL, checkBox, (void *)&dataArr[iter]);
-        }
-
-        remTasks -= currentCount;
-        remainingThreadCount -= 1;
-        iter += 1;
-    }
-    return iter;
-}
 void *checkRow(void *arg)
 {
     threadData *data = (threadData *)arg;
@@ -184,7 +144,6 @@ void *checkRow(void *arg)
     int start_point = data->start_point;
     int threadId = data->threadId;
     int check_count = data->check_count;
-
     unordered_map<int, bool> nums_seen; // key = number, value = seen
 
     for (int i = 0; i < check_count; i++)
@@ -195,6 +154,7 @@ void *checkRow(void *arg)
             if (nums_seen.find(num) != nums_seen.end())
             {
                 data->result = false;
+                cout << "Thread " << threadId << " checking row " << start_point << endl;
                 return NULL; // can call pthread_exit() here ?
             }
             else
@@ -215,7 +175,6 @@ void *checkColumn(void *arg)
     int start_point = data->start_point;
     int threadId = data->threadId;
     int check_count = data->check_count;
-
     unordered_map<int, bool> nums_seen; // key = number, value = seen
     for (int i = 0; i < check_count; i++)
     {
@@ -225,6 +184,7 @@ void *checkColumn(void *arg)
             if (nums_seen.find(num) != nums_seen.end())
             {
                 data->result = false;
+                cout << "Thread " << threadId << " checking column " << start_point << endl;
                 return NULL; // can call pthread_exit() here ?
             }
             else
@@ -245,7 +205,6 @@ void *checkBox(void *arg)
     int start_point = data->start_point;
     int threadId = data->threadId;
     int check_count = data->check_count;
-
     unordered_map<int, bool> nums_seen; // key = number, value = seen
     int sqrtn = sqrt(board.n);
 
@@ -261,6 +220,7 @@ void *checkBox(void *arg)
                 if (nums_seen.find(num) != nums_seen.end())
                 {
                     data->result = false;
+                    cout << "Thread " << threadId << " checking box " << start_point << endl;
                     return NULL; // can call pthread_exit() here ?
                 }
                 else
