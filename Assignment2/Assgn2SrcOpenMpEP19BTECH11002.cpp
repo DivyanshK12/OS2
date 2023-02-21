@@ -24,14 +24,14 @@ public:
     int k;
     vector<vector<int>> data;
 
-    Board()
+    Board() // default constructor
     {
         k = 0;
         n = 0;
         data = vector<vector<int>>(n, vector<int>(n));
     }
 
-    Board(string filename) // default constructor
+    Board(string filename) // constructor to read from file
     {
         ifstream file(filename);
         file >> k >> n;
@@ -59,7 +59,7 @@ public:
         }
     }
 
-    void print()
+    void print() // print the board
     {
         for (int i = 0; i < n; i++)
         {
@@ -74,7 +74,7 @@ public:
     void repr()
     {
         cout << "k = " << k << ", n = " << n << endl;
-        cout << &data << endl;
+        cout << &data << endl; // print the address of the data vector
     }
 };
 
@@ -85,13 +85,18 @@ typedef struct threadData
     int start_point;
     int check_count;
     vector<bool> results;
-} threadData;
+} threadData; // struct to store data for each thread
 
 void *checkRow(void *arg);
 void *checkColumn(void *arg);
 void *checkBox(void *arg);
 int createThreads(Mode mode, int remainingThreadCount, int remTasks, int iter,
                   threadData *dataArr, pthread_t *threadArr, Board board);
+
+string valid_output_helper(bool result)
+{
+    return result ? "is valid" : "is invalid";
+} // helper function to print valid/invalid
 
 int main()
 {
@@ -108,32 +113,53 @@ int main()
         dataArr[iter].results = vector<bool>(3, false);
     }
 
-    omp_set_dynamic(false);
-    omp_set_num_threads(K);
-    auto start = chrono::high_resolution_clock::now();
+    omp_set_dynamic(false); // disable dynamic adjustment of threads to use all K threads
+    omp_set_num_threads(K); // set number of threads to K
+
+    auto start = chrono::high_resolution_clock::now(); // start timer
 #pragma omp parallel for shared(dataArr)
-    for (int i = 0; i < N; i++)
+    for (int i = 0; i < N; i++) // create threads with N task units, each of 1 row check, 1 col check and 1 box check
     {
-        int tid = omp_get_thread_num(); // is now working
+        int tid = omp_get_thread_num();
         dataArr[i].threadId = tid;
         checkBox((void *)&dataArr[i]);
         checkColumn((void *)&dataArr[i]);
         checkRow((void *)&dataArr[i]);
     }
 
-    auto end = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::microseconds>(end - start);
-    cout << "Time taken by function: " << duration.count() << " microseconds" << endl;
+    auto end = chrono::high_resolution_clock::now();                          // end timer
+    auto duration = chrono::duration_cast<chrono::microseconds>(end - start); // calculate time taken
+
+    ofstream file;
+    file.open("output.txt");
+    for (int i = 0; i < N; i++)
+    {
+        // output data to file
+        file << "Thread " << dataArr[i].threadId + 1;
+        file << " checks row " << dataArr[i].start_point << " and ";
+        file << valid_output_helper(dataArr[i].results[0]) << endl;
+
+        file << "Thread " << dataArr[i].threadId + 1;
+        file << " checks column " << dataArr[i].start_point << " and ";
+        file << valid_output_helper(dataArr[i].results[1]) << endl;
+
+        file << "Thread " << dataArr[i].threadId + 1;
+        file << " checks box " << dataArr[i].start_point << " and ";
+        file << valid_output_helper(dataArr[i].results[2]) << endl;
+    }
+
+    file << "Time taken : " << duration.count() << " microseconds" << endl;
     for (int i = 0; i < board.n; i++)
     {
-        for(int j = 0; j < 3; j++)
-        if (!dataArr[i].results[j])
-        {
-            cout << "Board is not valid at " << i << " " << j << endl;
-            return 0;
-        }
+        for (int j = 0; j < 3; j++)     // for any of row, column or box check for each thread
+            if (!dataArr[i].results[j]) // if any of the checks is invalid, board is invalid
+            {
+                file << "Board is not valid" << endl;
+                return 0;
+            }
     }
-    cout << "Board is valid" << endl;
+    file << "Board is valid" << endl; // if all checks are valid, board is valid
+    file.close();
     return 0;
 }
 
@@ -143,26 +169,26 @@ void *checkRow(void *arg)
     Board board = data->board;
     int start_point = data->start_point;
     int threadId = data->threadId;
-    int check_count = data->check_count;
-    unordered_map<int, bool> nums_seen; // key = number, value = seen
+    int check_count = data->check_count; // read data from struct
+    unordered_map<int, bool> nums_seen;  // key = number, value = seen
     bool result = true;
 
     for (int i = 0; i < check_count; i++)
     {
-        for (int j = 0; j < board.n; j++)
+        for (int j = 0; j < board.n; j++) // for all elements in row
         {
-            int num = board.data[start_point + i][j];
-            if (nums_seen.find(num) != nums_seen.end())
+            int num = board.data[start_point + i][j];   // get number
+            if (nums_seen.find(num) != nums_seen.end()) // if number is already seen
             {
                 result = false;
-                return NULL; // can call pthread_exit() here ?
+                // return NULL; // can call pthread_exit() here ?
             }
             else
             {
                 nums_seen[num] = true;
             }
         }
-        nums_seen.clear();
+        nums_seen.clear(); // clear map for next row
     }
     data->results[0] = result;
     return NULL;
@@ -174,26 +200,26 @@ void *checkColumn(void *arg)
     Board board = data->board;
     int start_point = data->start_point;
     int threadId = data->threadId;
-    int check_count = data->check_count;
-    unordered_map<int, bool> nums_seen; // key = number, value = seen
+    int check_count = data->check_count; // read data from struct
+    unordered_map<int, bool> nums_seen;  // key = number, value = seen
     bool result = true;
 
     for (int i = 0; i < check_count; i++)
     {
-        for (int j = 0; j < board.n; j++)
+        for (int j = 0; j < board.n; j++) // for all elements in column
         {
-            int num = board.data[j][start_point + i];
-            if (nums_seen.find(num) != nums_seen.end())
+            int num = board.data[j][start_point + i];   // get number
+            if (nums_seen.find(num) != nums_seen.end()) // if number is already seen
             {
                 result = false;
-                return NULL; // can call pthread_exit() here ?
+                // return NULL; // can call pthread_exit() here ?
             }
             else
             {
                 nums_seen[num] = true;
             }
         }
-        nums_seen.clear();
+        nums_seen.clear(); // clear map for next column
     }
     data->results[1] = result;
     return NULL;
@@ -212,17 +238,17 @@ void *checkBox(void *arg)
 
     for (int i = 0; i < check_count; i++)
     {
-        int startRow = ((start_point + i) / sqrtn) * sqrtn;
-        int startCol = ((start_point + i) % sqrtn) * sqrtn;
+        int startRow = ((start_point + i) / sqrtn) * sqrtn; // get starting row and column of box
+        int startCol = ((start_point + i) % sqrtn) * sqrtn; // from start_point
         for (int j = 0; j < sqrtn; j++)
         {
             for (int k = 0; k < sqrtn; k++)
             {
-                int num = board.data[startRow + j][startCol + k];
-                if (nums_seen.find(num) != nums_seen.end())
+                int num = board.data[startRow + j][startCol + k]; // get number
+                if (nums_seen.find(num) != nums_seen.end())       // if number is already seen
                 {
                     result = false;
-                    return NULL; // can call pthread_exit() here ?
+                    // return NULL; // can call pthread_exit() here ?
                 }
                 else
                 {
@@ -230,7 +256,7 @@ void *checkBox(void *arg)
                 }
             }
         }
-        nums_seen.clear();
+        nums_seen.clear(); // clear map for next box
     }
     data->results[2] = result;
     return NULL;

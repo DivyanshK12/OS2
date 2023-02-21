@@ -4,9 +4,8 @@ python3 auto.py
 python3 auto.py
 python3 auto.py
 python3 auto.py
-cd ../ak_os
-python3 auto.py
-python3 auto.py
-python3 auto.py
-python3 auto.py
-python3 auto.py
+python3 auto2.py
+python3 auto2.py
+python3 auto2.py
+python3 auto2.py
+python3 auto2.py
