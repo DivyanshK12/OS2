@@ -21,10 +21,14 @@ string getSysTime();
 
 std::atomic_flag lock = ATOMIC_FLAG_INIT;
 
+static chrono::milliseconds averageTime = chrono::milliseconds(0);
+static chrono::milliseconds worstTime = chrono::milliseconds(0);
+static int counts = 0;
+
 int main(void)
 {
-    int n, k, l1, l2; // read n from file
-    FILE *fp = fopen("input.txt", "r");
+    int n, k, l1, l2;
+    FILE *fp = fopen("inp-params.txt", "r");
     fscanf(fp, "%d %d %d %d", &n, &k, &l1, &l2);
     fclose(fp);
 
@@ -33,16 +37,17 @@ int main(void)
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::exponential_distribution<double> exp1(l1);
-    std::exponential_distribution<double> exp2(l2);
+    std::exponential_distribution<> exp1((float)1/l1);
+    std::exponential_distribution<> exp2((float)1/l2);
 
     for (int i = 0; i < n; i++)
     {
         args[i].id = i;
         args[i].k = k;
         args[i].t1 = exp1(gen);
-        args[i].t2 = exp2(gen);// need to generate t1 and t2 from 
-        // exponentially distributed with an average of λ1, λ2 seconds.
+        args[i].t2 = exp2(gen);
+        args[i].n = n;
+        // cout << "Thread " << i << " t1: " << args[i].t1 << " t2: " << args[i].t2 << endl;
     }
 
     for (int i = 0; i < n; i++)
@@ -55,6 +60,9 @@ int main(void)
     {
         pthread_join(threads[i], NULL);
     }
+
+    cout << "Average time: " << averageTime.count() / counts << endl;
+    cout << "Worst time: " << worstTime.count() << endl;
 }
 
 void* testCS(void* args)
@@ -68,27 +76,29 @@ void* testCS(void* args)
 
     for (int i = 0; i < k; i++)// replacement for while(true)
     {
-        auto requested = std::chrono::system_clock::now();
-        auto reqEnterTime = std::chrono::system_clock::to_time_t(requested);
+        auto requested = getSysTime();
+        auto start = chrono::high_resolution_clock::now();
 
-        while(atomic_flag_test_and_set(&lock)); // do nothing
+        while(atomic_flag_test_and_set(&lock));
         
-        cout << "Thread " << id << " requested CS at " << getSysTime() << endl;
+        //cout << "Thread " << id << " requested CS at " << requested << endl;
 
-        auto actual = std::chrono::system_clock::now();
-        auto actEnterTime = std::chrono::system_clock::to_time_t(actual);
-        cout << "Thread " << id << " entered CS at " << getSysTime() << endl;
+        auto actual = getSysTime();
+        auto end = chrono::high_resolution_clock::now();
+        //cout << "Thread " << id << " entered CS at " << actual << endl;
 
-        sleep(t1); // critical section
-        // will calculate the worst time and average time here ?
+        usleep(t1*1000); // critical section
 
-        auto exit = std::chrono::system_clock::now();
-        auto exitTime = std::chrono::system_clock::to_time_t(exit);
-        cout << "Thread " << id << " exited CS at " << getSysTime() << endl;
+        auto exit = getSysTime();
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+        
+        worstTime = max(worstTime, chrono::milliseconds(duration));
+        averageTime += chrono::milliseconds(duration);
+        counts++;
 
         lock.clear();
 
-        sleep(t2); // remainder section
+        usleep(t2*1000); // remainder section
     }
 
     return NULL;

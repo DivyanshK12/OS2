@@ -20,11 +20,14 @@ void* testCS(void* args);
 string getSysTime();
 
 atomic_bool lock = false;
+static chrono::milliseconds averageTime = chrono::milliseconds(0);
+static chrono::milliseconds worstTime = chrono::milliseconds(0);
+static int counts = 0;
 
 int main(void)
 {
-    int n, k, l1, l2; // read n from file
-    FILE *fp = fopen("input.txt", "r");
+    int n, k, l1, l2;
+    FILE *fp = fopen("inp-params.txt", "r");
     fscanf(fp, "%d %d %d %d", &n, &k, &l1, &l2);
     fclose(fp);
 
@@ -33,16 +36,18 @@ int main(void)
 
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::exponential_distribution<double> exp1(l1);
-    std::exponential_distribution<double> exp2(l2);
+    std::exponential_distribution<double> exp1((float)1/l1);
+    std::exponential_distribution<double> exp2((float)1/l2);
 
     for (int i = 0; i < n; i++)
     {
         args[i].id = i;
         args[i].k = k;
+        args[i].n = n;
         args[i].t1 = exp1(gen);
         args[i].t2 = exp2(gen);// need to generate t1 and t2 from 
         // exponentially distributed with an average of λ1, λ2 seconds.
+        //cout << "Thread " << i << " t1: " << args[i].t1 << " t2: " << args[i].t2 << endl;
     }
 
     for (int i = 0; i < n; i++)
@@ -55,6 +60,9 @@ int main(void)
     {
         pthread_join(threads[i], NULL);
     }
+
+    cout << "Average time: " << averageTime.count() / counts << endl;
+    cout << "Worst time: " << worstTime.count() << endl;
 }
 
 void* testCS(void* args)
@@ -70,23 +78,30 @@ void* testCS(void* args)
     for (int i = 0; i < k; i++)// replacement for while(true)
     {
         auto requested = getSysTime();
+        auto start = chrono::high_resolution_clock::now();
         
         while(!lock.compare_exchange_strong(expected, true))
             expected = false; // do nothing)
         
-        cout << "Thread " << id << " requested CS at " << requested << endl;
+        //cout << "Thread " << id << " requested CS at " << requested << endl;
 
         auto actual = getSysTime();
-        cout << "Thread " << id << " entered CS at " << actual << endl;
+        auto end = chrono::high_resolution_clock::now();
+        //cout << "Thread " << id << " entered CS at " << actual << endl;
 
-        sleep(t1); // critical section
+        usleep(t1*1000); // critical section
 
         auto exit = getSysTime();
-        cout << "Thread " << id << " exited CS at " << exit << endl;
+        //cout << "Thread " << id << " exited CS at " << exit << endl;
+
+        auto duration = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+        worstTime = max(worstTime, chrono::milliseconds(duration));
+        averageTime += chrono::milliseconds(duration);
+        counts++;
 
         lock = false;
 
-        sleep(t2); // remainder section
+        usleep(t2*1000); // remainder section
     }
 
     return NULL;

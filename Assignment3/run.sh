@@ -1,3 +1,3 @@
-g++ cas.cpp -lpthread -o main 2>err.log
+g++ cas_bounded.cpp -lpthread -o main
 ./main > output.txt
 rm main
